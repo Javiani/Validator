@@ -1,208 +1,105 @@
 /**
- * @class Validator
- * @author Eduardo Ottaviani ( Javiani )
- * @version 1.1.0
+ *	@class Validator
+ *	@author Eduardo Ottaviani ( Javiani )
+ *	@version 2.0
  */
+
 ;(function(namespace, $){
 
-	//Static
-	var 
-		dup = function(o){ return $.extend({}, o) },
-
-		clone = function(){
-			var f = new Function;
-				f . prototype = Validator;
-			return new f;
-		},
+	var
+		Plugins,
+		Messages,
+		Rules = {},
 		
-		console = window.console || { 
+		console = window.console || {
 			warn :function(){},
 			log  :function(){},
-			error:function(){} 
+			error:function(){}
 		};
-
-	/**
-	 * @class Plugins
-	 */
-	var Plugins = { 
-		/**
-		 * @method Método estático para adicionar plugin no validador
-		 * @param {String} name Nome do plugin
-		 * @param {Function} fn 
-		 */
-		add : function(name, fn){ this.plugin[name] = fn },
-
-		plugin : {},
-
-		exec : function(rules, arr_elements){
-			for (var x in rules){
-				if (Plugins.plugin[x]) 
-					Plugins.plugin[x].call(this, arr_elements, rules[x]);
-			}
-		}
-	}
-
-	var Rules = { Class :function(){} };
-
-	var Messages = {
+	
+	namespace.Validator = {
+	
+		add_plugin :function(name, method){
+			Plugins.add(name, method);
+		},
 		
-		language : 'pt-br',
-		default_messages : {},
-
-		messages : function(language){ return Messages.default_messages[language]	},
-		change_messages : function(o){ Messages.default_messages = o },
-		
-		Class :function( msg ){
-
-			var pattern = /\{(\w*)\}/g;
-
-			this.text = function(name, field){
-
-				if (!msg.messages[name]){
-					return console.warn('Não existe mensagem definida para : ' + name);
-				}
-
-				if (field.customMessages && field.customMessages[name]){
-					return field.customMessages[name].replace(pattern, function(tag){
-						tag = tag.slice(1, -1);
-						return field.element[tag];
-					});
-				}
-
-				else{
-					return msg.messages[name].replace(pattern, function(tag){
-						tag = tag.slice(1, -1);
-						return field.element[tag];
-					});
-				}
-			}
-		}
-	}
-
-	/**
-	 * @class Validator
-	 * @author Eduardo Ottaviani 
-	 */
-	var Validator = {
-
-		addRule : function(name, method, messages){
-			Rules.Class.prototype[name] = method;
-				if(messages)
-					Messages.default_messages[Messages.language][name] = messages;
+		add_messages :function(o){
+			Messages.default_messages = o;
 		},
 
-		Class :function( el ){
-			
+		add_rule : function(name, method, messages){
+			Rules[name] = method;
+			if(messages) Messages.default_messages[name] = messages;
+		},
+
+		_class :function( el ){
+
 			//Private
-			var 
-				self = this,
-				arr_elements = [],
-				arr_elements_error = [],
-				disabled = [],
-				jsonRules = {},
-				handler = $(el),
-				setup = {
-					messages: Messages.default_messages[ Messages.language ],
-					addRule : null,
-					language: function(lang){ this.messages = Messages.messages(lang); }
-				},
-				
-				form = handler.is('form') ? handler :handler.parents('form'),
-				
-				rules = new Rules.Class,
-				messages = new Messages.Class( setup ),
+			var
+				_self = this, evt, 
+				arr_elements, arr_elements_error,	
+				rules, handler, current_rules,
 				fn_validation;
+				
+				function _construct(){
+					
+					set();	
+					test( handler );
+					
+					this.handler = handler;
+				}
+				
+				this.messages = Messages.default_messages;	
+				
+				this.bind = function( name, method ){
+					$(this).bind(name, function(e, error_list, error_map){
+						return method( error_list, error_map );
+					});
+				}
 
-				// Constructor
-				;(function(){
+				this.validate = function(rls, scope){
 
-					if(!handler.length){
-						console.warn(
-							'Não existe o elemento ' + el + ' para o validator. Tem certeza que está pegando o elemento certo?'
-						);
+					current_rules = rls;
+					fn_validation = validation;
+
+					add_validation.call( this, rls, scope );
+					handle_event('bind');
+
+					return this;
+				}
+
+				this.trigger = function(forceTrigger){
+					add_validation.call( this, current_rules );
+					return validation({ dont_trigger :!!forceTrigger});
+				}
+
+				this.live = function(rls, scope){
+
+					current_rules = rls;
+					add_validation.call( this, rls, scope );
+
+					var method = function(){
+						add_validation.call( this, rls, scope );
+						return validation();
 					}
 
-					this.handler = handler;
-					this.setup = setup;
-
-				}).call(this);
-
-				//Private
-				function add_Validation(rules, scope){
-
-					var container = scope || form;
-					jsonRules = rules;
-					arr_elements = [];
-
-						for (var x in rules){
-
-							$(x, container).each(function(){
-
-								arr_elements.push({
-									element: this,
-									rules: dup(rules[x].rules),
-									customMessages: dup( rules[x].messages ) || {}
-								});
-
-								Plugins.exec.call(self, rules[x], arr_elements[arr_elements.length - 1]);
-
-								$(this)
-									.unbind( 'keypress.validation' )
-									.bind( 'keypress.validation' , function(e){
-										if ( 
-											e.which == 13 &&
-											e.currentTarget.nodeName.toLowerCase() != 'textarea'
-										){
-											if(handler[0].nodeName.toLowerCase() != 'form')
-												handler.trigger('click');
-											else
-												handler.trigger('submit');
-											return false;
-										}
-
-								});
-
-							});
-						}
+					fn_validation = method;
+					handle_event('bind');
 				}
-				
-				function validation(){
 
-					var map = {};
-					arr_elements_error = [];
+				function set(){
 					
-						for(var x = 0; x < arr_elements.length;  x++){
-							var valid = true;
-							arr_elements[x].message = [];
-
-								for (var name in arr_elements[x].rules){
-
-									if (!rules[name] && !Plugins.plugin[name]) 
-										return console.warn('Não existe o método: ' + name);
-									
-									if(!rules[name]) continue;
-									
-									if (!rules[name].call(self, arr_elements[x], arr_elements[x].rules[name])) {
-										arr_elements[x].message.push (messages.text(name, arr_elements[x]) );
-										map[ name ] = messages.text( name, arr_elements[x] );
-										valid = false;
-									}
-
-								}
-								
-								if( !valid ) 
-									arr_elements_error.push( arr_elements[x] );
-						}
-
-						if ( arr_elements_error.length ) {
-							$(self).trigger('error', [arr_elements_error, map]);
-							return false;
-						}
-
-					return $(self).triggerHandler('success');
+					handler = $(el);
+					evt = $('<span />');
+					form = handler.is('form') ? handler :handler.parents('form');
+					
+					arr_elements = [];
+					arr_elements_error = []; 
+					rules = {};
 				}
-				
+
 				function handle_event(method){
+				
 					if(!handler.is('form')) {
 						if(method == 'bind')
 							handler[method]('click.validation', fn_validation);
@@ -216,111 +113,126 @@
 							handler[method]('submit.validation');
 					}
 				}
-
-			// Public
-
-			/**
-			 * @param {String} Name
-			 * @param {Function} Method
-			 */
-			this.bind = function( name, method ){
-				$(this).bind(name, function(e, error_list, error_map){
-					return method( error_list, error_map );
-				});
-			}
-			
-			/**
-			 * @method Método para adicionar um novo método de validação no validador
-			 * @param {String} name
-			 * @param {Function} method 
-			 */
-			this.setup.addRule = function(name, method){ 
-				if( method )
-					Rules[ name ] = method;
-				return this;
-			}
-
-			/**
-			 * @method Método para adicionar as regras. 
-			 * @param {JSON} rules
-			 */
-			this.validate = function(rules, scope){
-				fn_validation = validation;
-				add_Validation.call( this, rules, scope );
-				handle_event('bind');
-				return this;
-			}
-			
-			/**
-			 * @method live
-			 * @param {JSON} rules
-			 */
-			this.live = function(rules, scope){
-
-				add_Validation.call( this, rules, scope );
 				
+				function add_validation(rls, scope){
+									
+					var 
+						container = scope || form;
+					
+					rules = rls;
+					arr_elements = [];
 
-				var method = function(){
-					add_Validation.call( this, rules, scope );
-					return validation();
+					for (var x in rls){
+
+						$(x, container).each(function(){
+
+							arr_elements.push({
+								element: this,
+								rules: dup( rls[x].rules ),
+								custom_messages: dup( rls[x].messages ) || {}
+							});
+
+							Plugins.execute.call(_self, rls[x], arr_elements[arr_elements.length - 1]);
+						});
+					}
 				}
-				fn_validation = method;
-				handle_event('bind');
 
-			}
+				function validation(e){
 
-			/**
-			 * @method Método para habilitar campos desabilitados
-			 */
-			this.enable = function(type){
-				handle_event('bind');
-			}
+					var 
+						map = {},
+						element, valid, x,
+						length = arr_elements.length;
 
-			/**
-			 * @method Método para desabilitar os campos
-			 */
-			this.disable = function(){
-				handle_event('unbind');
-			}
+					arr_elements_error = [];
 
-			/**
-			 * @method Método para retirar validações de um campo
-			 * @param {String} field String jQuery para pegar o campo validado
-			 * @param {Array} [String] rule Lista com regras à serem removidas 
-			 */
-			this.clear = function(field, rule){
-				var self = this;
-				var iterate = function(r){
-					$(field, form).each(function(){
-						for (var x = 0; x < arr_elements.length; x++) {
-							arr_elements[x].element == this ? delete arr_elements[x].rules[r] : null;
-							if(arr_elements[x].element == this)
-								delete arr_elements[x].rules[r];
-						}			
-					})
+					for(x = 0; x < length; x++){
+						
+						valid = true;
+						
+						el = arr_elements[x];
+						el.message = [];
+							
+						for (var name in el.rules){
+
+							if (!Rules[name] && !Plugins.plugin[name])
+								return console.warn('Não existe o método: ' + name);
+
+							if(!Rules[name]) continue;
+
+							if (!Rules[name].call( _self, el, el.rules[name] )) {
+								el.message.push( Messages.get(name, el) );
+								map[ name ] = Messages.get( name, el );
+								valid = false;
+							}
+						}
+
+						if( !valid ) arr_elements_error.push( el );
+					}
+
+					if ( arr_elements_error.length ) {
+						$(_self).trigger('error', [arr_elements_error, map]);
+						return false;
+					}
+
+					if(e && e.dont_trigger) return true; 
+
+					return $( _self ).triggerHandler('success', [_self.handler, _self]);
 				}
+
+			_construct.call(this);
+
+		},
+
+		create :function(o){ return new this._class(o); }
+	}
+	
+	Messages = { 
+		
+		default_messages : {},
+		
+		get :function(name, el){
+			
+			var 
+				field = el.element,
+				data = $(field).data('name'),
+				message = el.custom_messages[name] || Messages.default_messages[name];
+			
+			if(!message){
+				console.warn('Não existe mensagem definida para : ' + name);
+				return '';
+			}
 				
-					if(!arguments.length) 
-						arr_elements = [];
-
-					else if (rule.constructor == Array)
-						for(var a = 0; a < rule.length; a++)
-							iterate( rule[a] );
-					else
-						iterate(rule);
-
-				return this;
-			}
-
+			message = message.replace(/\{name\}/g, data || field.title );
+			return message;
 		}
+	};
+	
+	Plugins = {
+		
+		add : function(name, fn){ this.plugin[name] = fn },
 
+		plugin : {},
+
+		execute : function(rules, arr_elements){
+			for (var x in rules){
+				if (Plugins.plugin[x])
+					Plugins.plugin[x].call(this, arr_elements, rules[x]);
+			}
+		}
+	};
+	
+	function dup(o){ 
+		return $.extend({}, o); 
 	}
 
-	Validator.Class.language = function(lang){ Messages.language = lang };
-	Validator.Class.addRule = Validator.addRule;
-	Validator.Class.addPlugin = function(){ Plugins.add.apply(Plugins, arguments) };
-	Validator.Class.pushMessages = Messages.change_messages;
-
-	namespace.Validator = Validator.Class;
+	function test(h){
+		
+		if(!h.length){
+			console.warn(
+				'Não existe o elemento ' + el + ' para o validator. Tem certeza que está pegando o elemento certo?'
+			);
+		}
+	}
 
 })(window, jQuery)
