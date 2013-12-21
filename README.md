@@ -21,7 +21,7 @@ File containing all available rules.
 
 ##### Then, if you want all elements with class name "required" to be mandatory:
 
-```
+```js
 var instance = Validator.create( $('form') );
 	instance . validate({
 		'.required' :{
@@ -46,7 +46,7 @@ If the form is valid, submit will be fired as usual, if it's not, form submit ac
 
 In case you don't want to submit form in success, for instance, if it's an ajax request, you can prevent default submit form action.
 
-```
+```js
 instance.bind('success', function(form){
 	var data = form.serialize();
 	$.post('/url/service', data);
@@ -61,7 +61,7 @@ Here's where you have full control of what should be displayed for user when som
 
 **Validator don't know what you want**, it's up on you to code and decide how messages errors should be rendered.
 
-```
+```js
 instance.bind('error', function(error_list, error_map){
 
 	console.log( error_list, error_map ); 
@@ -84,7 +84,7 @@ instance.bind('error', function(error_list, error_map){
 Let's say you want to give a unique message for a single input element:
 
 
-```
+```js
 instance.validate({
 
 	'.required' :{
@@ -112,7 +112,7 @@ Is easy to extend Validator with new rules or plugins. You can add some brand ne
 
 Validator already comes with a plugin called `mask` and some default mask methods such as `accept`, `digits`, `email`, `letters`, `date` and some others methods.
 
-```
+```js
 instance.validate({
 	'.number' :{
 		rules :{ required :true },
