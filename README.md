@@ -126,4 +126,7 @@ instance.validate({
 
 Of course, you can edit/add/remove validator.rules or validator.messages files as you wish, you can remove unwanted rules methods, or add you own, you can change all the default messages, add new ones or remove some unused. 
 
+##Reference
+You can find more information about Validator api right [here](http://javiani.googlecode.com/svn/trunk/documentation/validator/index.htm#!/sobre)
+
 
