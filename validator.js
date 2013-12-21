@@ -52,7 +52,7 @@
 				this.messages = Messages.default_messages;	
 				
 				this.bind = function( name, method ){
-					$(this).bind(name, function(e, error_list, error_map){
+					$(evt).bind(name, function(e, error_list, error_map){
 						return method( error_list, error_map );
 					});
 				}
@@ -125,7 +125,6 @@
 					for (var x in rls){
 
 						$(x, container).each(function(){
-
 							arr_elements.push({
 								element: this,
 								rules: dup( rls[x].rules ),
@@ -160,8 +159,8 @@
 
 							if(!Rules[name]) continue;
 
-							if (!Rules[name].call( _self, el, el.rules[name] )) {
-								el.message.push( Messages.get(name, el) );
+							if (!Rules[name].call( _self, el, el.rules[name] )){
+								el.message.push( Messages.get( name, el ) );
 								map[ name ] = Messages.get( name, el );
 								valid = false;
 							}
@@ -171,13 +170,13 @@
 					}
 
 					if ( arr_elements_error.length ) {
-						$(_self).trigger('error', [arr_elements_error, map]);
+						$(evt).trigger('error', [arr_elements_error, map]);
 						return false;
 					}
 
 					if(e && e.dont_trigger) return true; 
 
-					return $( _self ).triggerHandler('success', [_self.handler, _self]);
+					return $( evt ).triggerHandler('success', [_self.handler, _self]);
 				}
 
 			_construct.call(this);
