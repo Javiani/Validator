@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# Validator building process.
+# Dependencies : curl, node.
+# More info : http://requirejs.org/docs/optimization.html#empty
+
+
+echo "[Build :: Validator]" &&
+echo "Loading require.js for build..." &&
+curl -o r.js https://raw.githubusercontent.com/jrburke/r.js/master/dist/r.js &&
+echo "File loaded successfully" &&
+echo "Building Validator...." &&
+node r.js -o name=validator out=validator.js baseUrl=src &&
+echo "Cleaning it up..." &&
+rm -r r.js &&
+echo "Project builded!"
