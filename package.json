@@ -1,0 +1,25 @@
+{
+  "name": "validator",
+  "version": "2.0.0",
+  "description": "Validator module helper to execute any king of validations in a form or on any other holders with form elements fields.",
+  "main": "validator.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Javiani/Validator.git"
+  },
+  "keywords": [
+    "Validator",
+    "Javiani",
+    "Javascript",
+    "AMD"
+  ],
+  "author": "Eduardo Ottaviani ( Javiani )",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Javiani/Validator/issues"
+  },
+  "homepage": "https://github.com/Javiani/Validator#readme"
+}

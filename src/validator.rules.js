@@ -34,9 +34,9 @@
 			rules[name] = method;
 		},
 
-        add_all :function(r){
-            rules = r;
-        },
+		add_all :function(r){
+			rules = r;
+		},
 
 		test :function(element, name, options){
 

@@ -108,6 +108,14 @@
 			}
 		},
 
+		add_messages :function(o){
+			Messages.add_all(o);
+		},
+
+		add_rule :function(name, method){
+			Rules.add(name, method);
+		},
+
 		internal :function(o){
 			return({ Rule :Rules, Message :Messages, Plugin :Plugins })[o];
 		},

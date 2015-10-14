@@ -1,26 +1,6 @@
-/**
- *	@name Custom Rules
- *	@author Eduardo Ottaviani
- */
+;(function(){
 
-(function (root, factory) {
-
-	if(typeof exports === 'object' && exports) {
-		module.exports = factory( require('validator') );
-	}else{
-
-		if(typeof define === 'function' && define.amd) {
-			define(['validator'], factory); // AMD
-		}else{
-			factory( root.Validator ); // <script>
-		}
-	}
-
-}(this, function( Validator ){
-
-	var R = Validator.internal('Rule');
-
-	R.add('required', function(element, bool){
+	Validator.add_rule('required', function(element, bool){
 
 		if(!bool) return true;
 
@@ -37,19 +17,19 @@
 		return ( !!( el.checked || $.trim(el.value) ) || valid );
 	});
 
-	R.add('accept', function(element, args){
+	Validator.add_rule('accept', function(element, args){
 		var value = element.value;
 		if(!value) return true;
 		return !!value.split(/\./).pop().match(args);
 	});
 
-	R.add('different', function(element, text){
-		if (!element.value.match(text)) 
+	Validator.add_rule('different', function(element, text){
+		if (!element.value.match(text))
 			return true;
 		else return false;
 	});
 
-	R.add('minlength', function(element, size){
+	Validator.add_rule('minlength', function(element, size){
 
 		var
 			custom = element.custom_messages,
@@ -62,14 +42,14 @@
 		return !!(value.length >= size);
 	});
 
-	R.add('phone', function(element, strPattern){
+	Validator.add_rule('phone', function(element, strPattern){
 
 		var v = element.value;
 
 		if(!value){ return true; }
 
 		if(strPattern.replace)
-			return new RegExp( 
+			return new RegExp(
 				strPattern . replace(/(\W)/gi,'\\$1').replace(/x/gi, '\\d')
 			) . test(value);
 
@@ -80,7 +60,7 @@
 		else return false;
 	});
 
-	R.add('email', function(element, bool){
+	Validator.add_rule('email', function(element, bool){
 
 		var
 			value = element.value,
@@ -93,14 +73,14 @@
 		return (!bool || !value || pass );
 	});
 
-	R.add('number', function(element, bool){
+	Validator.add_rule('number', function(element, bool){
 		var v = element.value;
 		if (!bool || !v || !v.match(/\D/))
 			return true;
 		else return false;
 	})
 
-	R.add('date', function(element, type){
+	Validator.add_rule('date', function(element, type){
 
 		var
 			_arrdata = [],
@@ -113,23 +93,23 @@
 
 			switch( typeof type ){
 
-				case 'boolean' : 
+				case 'boolean' :
 					_arrdata = value.replace(/\D/g,'\/').split(/\//);
 						if(!value) return true;
 				break
 
-				case 'string' : 
+				case 'string' :
 					var c = type.replace(/ /g,'');
 					var empty = !(!!value);
-								
-					$(c).each(function(){ _arrdata.push(this.value); if(this.value) empty = false; });	
+
+					$(c).each(function(){ _arrdata.push(this.value); if(this.value) empty = false; });
 						if( empty ) return true;
 			}
 
 		return date( +_arrdata[0], +_arrdata[1], +_arrdata[2] );
 	});
 
-	R.add('equalTo', function(element, another){
+	Validator.add_rule('equalTo', function(element, another){
 
 		var
 			text,
@@ -142,8 +122,8 @@
 		element.custom_messages.equalTo = msg.replace(/\{target\}/g, text || another.title );
 		return el.value == another.value;
 	});
-	
-	R.add('cpf', function(element, bool) {
+
+	Validator.add_rule('cpf', function(element, bool) {
 		if(!bool) return true;
 		var v = element.value.replace(/\D/g,'');
 		if (v == "00000000000" || v == "11111111111" || v == "22222222222" || v == "33333333333" || v == "44444444444" || v == "55555555555" || v == "66666666666" || v == "77777777777" || v == "88888888888" || v == "99999999999") return false;
@@ -164,7 +144,7 @@
 		return true;
 	});
 
-	R.add('cnpj', function(element) {
+	Validator.add_rule('cnpj', function(element) {
 
 		var cnpj = element.value.replace(/\D/g, '');
 		var numeros, digitos, soma, i, resultado, pos, tamanho, digitos_iguais;
@@ -212,5 +192,4 @@
 			return false;
 	});
 
-	return R;
-}));
+})();
