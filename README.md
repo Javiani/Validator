@@ -8,9 +8,9 @@
 
 >**Author**: [Eduardo Ottaviani](//github.com/javiani)
 
->**Demo**: [Demo](//rawgit.com/Validator/sample/master/example/index.htm)
+>**Demo**: [Demo](//codepen.io/Javiani/pen/KdXWJe)
 
->**AMD Demo ( Requirejs )**: [Demo](//rawgit.com/Validator/sample/master/example/index.htm)
+>**AMD Demo ( Requirejs )**: [Demo](//codepen.io/Javiani/pen/qOPrzE)
 
 ---
 
