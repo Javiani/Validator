@@ -4,7 +4,7 @@
 
 >**Version** :`2.0.0`
 
->**Dependencies**: `jQuery`
+>**Dependencies**: `jQuery` or `Zepto` or any `jQuery-like` library
 
 >**Author**: [Eduardo Ottaviani](//github.com/javiani)
 
@@ -16,8 +16,8 @@
 
 Validator was designed to simplify our way to validate forms.
 - Does not have any default behavior, so you don't need to overload methods and struggles unecessary default behaviors.
-- Low lerning curve
-- Let's your validations more readable and maintainable
+- Low learning curve
+- Makes form validation more readable and maintainable
 - You can validate partials sections of your form
 
 ### And... It doesn't need a form.
