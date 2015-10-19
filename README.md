@@ -1,6 +1,6 @@
-# Validator
+# Validator 
 
->A lightweight and flexible Javascript validation module.
+>A lightweight and flexible Javascript module to validate UI.
 
 >**Version** :`2.0.0`
 
@@ -14,8 +14,8 @@
 
 ---
 
-Validator was designed to simplify our way to validate forms.
-- Does not have any default behavior, so you don't need to overload methods and struggles unecessary default behaviors.
+Validator was designed to simplify our way to validate business rules on forms or on html views.
+- Does not have any default behavior, so you don't need to overload methods and struggles unnecessary default behaviors.
 - Low learning curve
 - Makes form validation more readable and maintainable
 - You can validate partials sections of your form
