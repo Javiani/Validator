@@ -63,10 +63,11 @@ var instance = Validator.create({ holder :$('div.section-required') });
 ## Defining a rule
 
 ```js
-Validator.add_rule('required', function(field, bool){
+Validator.add_rule('required', function(field, parameter){
 
-	//bool keeps boolean value of the rule.
-	if(!bool) return true; // Ok! move on required is set to false.
+	//parameter is the required key value
+	//it can be any anything, on our case is a true
+	//Our case is a true value, there's nothing to do with that
 
 	var value = field.value.trim();
 
