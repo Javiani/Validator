@@ -1,6 +1,6 @@
 # Validator 
 
->A lightweight and flexible Javascript module to validate UI.
+>A lightweight and flexible UMD Javascript module to validate UI. 
 
 >**Version** :`2.0.0`
 
@@ -8,9 +8,7 @@
 
 >**Author**: [Eduardo Ottaviani](//github.com/javiani)
 
->**Demo**: [Demo](//codepen.io/Javiani/pen/KdXWJe)
-
->**AMD Demo ( Requirejs )**: [Demo](//codepen.io/Javiani/pen/qOPrzE)
+>**Demo**: [Demo](//plnkr.co/edit/Bfg3CAX4gfEflTvXXALW)
 
 ---
 
