@@ -37,7 +37,7 @@ v.validate(); // true or false
 
 ```
 
-### Setting all together :
+### Setting all together
 
 ```js
 var instance = Validator.create({ holder :$('div.section-required') });
