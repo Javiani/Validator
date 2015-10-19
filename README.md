@@ -8,7 +8,7 @@
 
 >**Author**: [Eduardo Ottaviani](//github.com/javiani)
 
->**Demo**: [Demo](//plnkr.co/edit/Bfg3CAX4gfEflTvXXALW)
+>**Demo**: [Demo](http://plnkr.co/edit/Bfg3CAX4gfEflTvXXALW)
 
 ---
 
