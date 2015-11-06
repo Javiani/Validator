@@ -222,10 +222,6 @@ In this case, `get-validator` event can help you a lot. You can get the validato
 If you have several holders in the page, each one with your own validator instance, you'll be able to get the right instance of the holder you need.
 
 
-##Going deeper…
-
-But be careful doing that, one mask can override another and may do not work properly. For instance, if you setup `number|email` number will conflict with email since email accepts letters and number don't.
-
 ## Building
 
 Validator is "compiled" using r.js that generates a bundle with validator/rules/messages classes.
