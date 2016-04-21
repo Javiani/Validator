@@ -6,7 +6,7 @@
 
 	if(typeof exports === 'object' && exports) {
 		// CommonJS
-		module.exports = factory( require('validator.rules'), require('validator.messages'), require('validator.plugins') );
+		module.exports = factory( require('./src/validator.rules'), require('./src/validator.messages'), require('./src/validator.plugins') );
 	}else{
 
 		if(typeof define === 'function' && define.amd) {
