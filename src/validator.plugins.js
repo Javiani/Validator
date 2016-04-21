@@ -9,7 +9,7 @@
 	}else{
 
 		if (typeof define === "function" && define.amd) {
-			define( ['validator.plugins'], factory() ); // AMD
+			define( factory() ); // AMD
 		}else{
 			root.Plugins = factory(); // <script>
 		}

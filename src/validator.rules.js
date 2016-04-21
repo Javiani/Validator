@@ -9,7 +9,7 @@
 	}else{
 
 		if (typeof define === "function" && define.amd) {
-			define( ['validator.rules'], factory() ); // AMD
+			define( factory() ); // AMD
 		}else{
 			root.Rules = factory(); // <script>
 		}
