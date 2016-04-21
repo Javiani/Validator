@@ -1,240 +1,132 @@
-# Validator 
+#Validator
 
->A lightweight and flexible UMD Javascript module to validate UI. 
+Validator is a simple, easy to use tool for client-side validation. It was born inspired in the very known [jQuery Validation plugin](http://jqueryvalidation.org/).
 
->**Version** :`2.0.0`
-
->**Dependencies**: `jQuery` or `Zepto` or any `jQuery-like` library
-
->**Author**: [Eduardo Ottaviani](//github.com/javiani)
-
->**Demo**: [Demo](http://plnkr.co/edit/Bfg3CAX4gfEflTvXXALW)
-
----
-
-Validator was designed to simplify our way to validate business rules on forms or on html views.
-- Does not have any default behavior, so you don't need to overload methods and struggles unnecessary default behaviors.
-- Low learning curve
-- Makes form validation more readable and maintainable
-- You can validate partials sections of your form
-
-### And... It doesn't need a form.
-
-```js
-var myholder = $('div.form');
-
-v = Validator.create({ holder :myholder });
-
-v.add( '.required' , { rules :{ required :true } });
-v.add( '.number' , { rules :{ number :true } });
-v.add( 'input[type=email]' , { rules :{ email :true } });
-v.add( 'input[type=file]' , { rules :{ accept :'jpg|png|gif' } });
+The Validator project give less plug and more control for you to choose what do you want to do with validation errors, and what to do when the form is valid, this can be very handful if your project needs to show messages in some very specific way. Also, Validator has a pretty low learning curve.
 
 
-v.validate(); // true or false
+##Getting started
 
-```
+First, you need to load 3 main Validator files:
 
-### Setting all together
+#### 1. validator.js
+The main validator class with all methods and properties.
+
+#### 2. validator.messages.js
+Default messages for rules.
+
+#### 3. validator.rules.js
+File containing all available rules.
+
+
+##### Then, if you want all elements with class name "required" to be mandatory:
 
 ```js
-var instance = Validator.create({ holder :$('div.section-required') });
-	instance.add_all({
+var instance = Validator.create( $('form') );
+	instance . validate({
 		'.required' :{
 			rules :{
 				required :true
 			}
-		},
-		'.number' :{
-			rules :{
-				number :true
-			}
-		},
-		'.email' :{
-			rules :{
-				email :true
-			}
 		}
 	});
 ```
+And there you go! It can't be more simple. 
 
-## Defining a rule
+This setup will bind a validation in the form passed in `create()` method.
+ 
+
+## Binding events
+
+
+If the form is valid, submit will be fired as usual, if it's not, form submit action will be prevented.
+
+
+### Success
+
+In case you don't want to submit form in success, for instance, if it's an ajax request, you can prevent default submit form action.
 
 ```js
-Validator.add_rule('required', function(field, parameter){
-
-	//parameter is the required key value
-	//it can be any anything, on our case is a true
-	//Our case is a true value, there's nothing to do with that
-
-	var value = field.value.trim();
-
-	if( value )
-		// Ok, there's a value, it's valid.
-		return true;
-	else
-		// Oh...the required rule was not satisfied. Field is invalid.
-		return false;
+instance.bind('success', function(form){
+	var data = form.serialize();
+	$.post('/url/service', data);
+	return false; //This will prevent default behavior 
 });
+
 ```
 
-## Defining default messages
+### Error
+
+Here's where you have full control of what should be displayed for user when something is invalid on your form. 
+
+**Validator don't know what you want**, it's up on you to code and decide how messages errors should be rendered.
 
 ```js
-Validator.add_messages({
-	required : 'Hey, this field is required',
-	email    : 'Invalid email!'
+instance.bind('error', function(error_list, error_map){
+
+	console.log( error_list, error_map ); 
+	// Is always a good idea to take a look into the object.
+
+	var 
+		form = instance.handler,
+		msg = $('#messages').empty();
+	
+	$.each( error_list, function(i){
+		msg.append( '<p>' + this.message[0] + '</p>' );
+		// This will list all first error list in the 
+	});
+
 });
-```
 
-## Overriding default messages on definition
+```
+##Custom Messages
+
+Let's say you want to give a unique message for a single input element:
+
 
 ```js
-instance.add({
+instance.validate({
+
 	'.required' :{
-		rules :{ required :true },
+		rules :{ required :true }
+	},
+	
+	'#username' :{
+		rules :{
+			required :true	
+		},
 		messages :{
 			required : 'Sorry, you have to fill username field =)'
 		}
 	}
 });
+
 ```
 
-## API
+You can customize any input you want just adding a messages attribute and setting a custom message for a rule. The default message will overwrite only `#username` required message.
 
-#### .validate() : `Boolean`
 
-This method will trigger validation, and will return true if it's valid and false otherwhise.
+##Plugins
 
-```js
-var is_valid = instance.validate();
-```
+Is easy to extend Validator with new rules or plugins. You can add some brand new behaviors and save a lot of work in your projects.
 
-#### .remove( 'name' )
-
-Removes a group from validation.
+Validator already comes with a plugin called `mask` and some default mask methods such as `accept`, `digits`, `email`, `letters`, `date` and some others methods.
 
 ```js
-instance.remove('.required');
-```
-
-#### .test( DOM | jQuery element ) : `Object`
-
-Test if a element is valid or not, also returns some validations properties.
-
-```js
-v.test( $('input.required').eq(0) );
-```
-
-#### .add( {definition} )
-
-Adds a single element validation definition.
-
-```js
-v.add( '.required' , { rules :{ required :true } });
-```
-
-#### .add_all( {definitions} )
-
-Adds all groups validations definitions at once. See [Setting all together](#setting-all-together) section.
-
-#### .is_valid() : `Boolean`
-
-Checks if the form is valid or not.
-
-
-## Events
-
-Validator triggers events for success or error.
-
-#### .on('validator.success', Function )
-
-This event will fire if the **.validate()** returns true;
-
-```js
-instance.on('validator.success', function(){
-	var data = $('form.contact').serialize();
-	$.post('/url/service', data);
+instance.validate({
+	'.number' :{
+		rules :{ required :true },
+		mask  :'digits'
+	}
 });
 ```
-
-#### .on('validator.error', function(error){} )
-
-Here's where you have full control of what should be displayed for user when something is invalid on your form.
-
-**Validator doesn't know your needs**, it's up to you to code and decide how messages errors should be rendered.
-
-```js
-instance.on('error', function(error){
-
-	console.log( error.list, error.map );
-	// Is always a good idea to take a look into the object.
-
-	var
-		form = $('form.contact'),
-			feedback = $('.messages').empty();
-
-	$.each( error.list, function(i){
-		feedback.append( '<p>' + this.messages.list[0] + '</p>' );
-		// This will show a list with the first message of each invalid fields.
-	});
-});
-```
-
-
-## Events - Pub/Sub
-
-Sometimes we need to bind some events in the html elements, and it can be very handy…
-
-```js
-var instance = Validator.create({ holder :$('div.section-required') });
-```
-Let that `div.section-required` in the example above to be a `holder`.
-
-##### Your holder will fire the following events:
-
-### on('validator.add', Function)
-
-Will be fired on every call of `.rules()` or `.add()` instance methods.
-
-
-### on('validator.remove', Function)
-
-Will be triggered on every `.remove()` instance method calls.
-
-
-### on('validator.instance', Function(instance))
-
-That's seems a little weird.. but it will save you trust me…
-
-There some times when you really need to get the instance from other module or some other script scope… That's when and you will see yourself trying to get the instance by adding new methods and send them by parameters and everything and you're code can be a mess..
-
-In this case, `get-validator` event can help you a lot. You can get the validator  instance by triggering manually this event:
-
-```js
-	var instance;
-	$('.form-holder').trigger('validator.instance', function(validator){
-		instance = validator;
-		// Now you do whatever you want =)
-	});
-```
-
-If you have several holders in the page, each one with your own validator instance, you'll be able to get the right instance of the holder you need.
-
-
-## Building
-
-Validator is "compiled" using r.js that generates a bundle with validator/rules/messages classes.
-If you want to do some changes on them, you'll have to put them all in the same folder and run: `./build`
 
 
 ##And that's it...
 
-Of course, you can edit/add/remove rules.js or messages.js custom files as you wish, you can remove unwanted rules methods, or add your own, you can change all the default messages, add new ones or remove some unused.
+Of course, you can edit/add/remove validator.rules or validator.messages files as you wish, you can remove unwanted rules methods, or add you own, you can change all the default messages, add new ones or remove some unused. 
 
-## TODOS
+##Reference
+You can find more information about Validator api right [here](http://javiani.googlecode.com/svn/trunk/documentation/validator/index.htm#!/sobre)
 
-- Reviews in Readme.md ✓
-- To Improve documentation
-- ~~Adding some plugins~~
-- To create some "do everything" wrappers for lazy ones ( like me ).
+

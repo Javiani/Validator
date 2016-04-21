@@ -1,1 +1,237 @@
-(function(e,t){typeof exports=="object"&&exports?module.exports=t():typeof define=="function"&&define.amd?define("validator.rules",["validator.rules"],t()):e.Rules=t()})(this,function(){var e,t={};return e={get:function(){return t},add:function(e,n){if(e in t){console.log("Rules.add::exception","Duplicated method",e);return}t[e]=n},add_all:function(e){t=e},test:function(e,n,r){return n in t?t[n].call(null,e,r):(console.log("Rules.test::exception","There is no method",n),!1)},validate:function(e,t,n){var r=!0,i=this;return $.each(t.rules,function(t,r){i.test(e.element,t,r)||(e.invalid_rules[t]=r,e.is_valid=!1,n?n.call(null,e,t):null)}),r}},e}),function(e,t){typeof exports=="object"&&exports?module.exports=t():typeof define=="function"&&define.amd?define("validator.messages",["validator.messages"],t()):e.Messages=t()}(this,function(){function n(e){return function(){return e}}var e,t;return t={"default":"No message defined for: "},e={add:function(e,n){t[e]=n},add_all:function(e){t=e},write:function(e,n){return t[e]?t[e].call?t[e].call(null,element):t[e]:t.default+e},write_all:function(e,t){var n=this;$.each(e.invalid_rules,function(r){var i;t.messages&&(i=t.messages[r])?e.messages.map[r]=i.call?i.call(null,e):i:e.messages.map[r]=n.write(r,e),e.messages.list.push(e.messages.map[r])})}},e}),function(e,t){typeof exports=="object"&&exports?module.exports=t():typeof define=="function"&&define.amd?define("validator.plugins",["validator.plugins"],t()):e.Plugins=t()}(this,function(){function r(e,t){$.each(n,function(){this.each_elements(e,t)})}function i(e,t,r){$.each(n,function(i){i in t&&n[i].initialize($(e),t[i],r)})}function s(e,t){$.each(e,function(e,t){i(e,t)})}function o(){return this.initialize=this.initialize||function(){},this.each_elements=this.each_elements||function(){},this}var e,t,n={};return e=o.apply({initialize:function(e,t,n){return n?i(n,t,e):s(t,e)},add:function(e,t){n[e]=o.apply(t)},get:function(e){return n[e]},each_elements:function(e,t){r(e,t)}}),e}),function(e,t){typeof exports=="object"&&exports?module.exports=t(require("validator.rules"),require("validator.messages"),require("validator.plugins")):typeof define=="function"&&define.amd?define("validator",["validator.rules","validator.messages","validator.plugins"],t):(e.Validator=t(e.Rules,e.Messages,e.Plugins),delete e.Rules,delete e.Messages,delete e.Plugins)}(this,function(e,t,n){function i(e,t){return{element:e.get?e.get(0):e,rules:$.extend({},t.rules),invalid_rules:{},messages:$.extend({map:{},list:[]},{map:t.messages}),is_valid:!0}}function s(r,s,o,u){var a=i(r,s);return e.validate(a,s,l(o)),o.list.length&&t.write_all(a,s),n.each_elements(a,s),a}function o(e,t){var n={list:[],map:{}};return $.each(e,a(t,n)),n}function u(e){return function(t,n){e(n)}}function a(e,t){return function(n,r){$(n,e).each(f(r,t,e))}}function f(e,t,n){return function(r,i){s(i,e,t,n)}}function l(e){return function(t,n){e.list.push(t),e.map[n]=e.map[n]||[],e.map[n].push(t)}}var r={_class:function(e){function a(e,t){t?t(i):null}var t,r={},i=this;t=e&&e.holder&&e.holder.length?e.holder:$("<div />"),t.on("validator.instance",a),t.on("validator:instance",a),this.test=function(e){var t={rules:{}};return e=e.get?e:$(e),$.each(r,function(n,r){(e.is(n)||e.hasClass(n))&&$.extend(t.rules,r.rules)}),s(e,{rules:t.rules},{list:[],map:{}})},this.get=function(e){return r[e]},this.on=function(e,n){t.on(e,u(n))},this.add=function(e,i){return r[e]=i,n.initialize(t,i,e),t.trigger("validator.add",t,i,e),t.trigger("validator:add",t,i,e),this},this.add_all=function(e){return r=e,n.initialize(t,e),t.trigger("validator.add",t,e),t.trigger("validator:add",t,e),this},this.remove=function(e){delete r[e],t.trigger("validator.remove",e),t.trigger("validator:remove",e)},this.validate=function(){var e=o(r,t);return e.list.length?(t.trigger("validator.error",e),t.trigger("validator:error",e)):(t.trigger("validator.success"),t.trigger("validator:success")),!e.list.length},this.is_valid=function(){return!o(r,t).list.length}},add_messages:function(e){t.add_all(e)},add_rule:function(t,n){e.add(t,n)},internal:function(r){return{Rule:e,Message:t,Plugin:n}[r]},create:function(e){return new this._class(e)}};return r});
+/**
+ *	@class Validator
+ *	@author Eduardo Ottaviani ( Javiani )
+ *	@version 2.0
+ */
+
+;(function(namespace, $){
+
+	var
+		Plugins,
+		Messages,
+		Rules = {},
+		
+		console = window.console || {
+			warn :function(){},
+			log  :function(){},
+			error:function(){}
+		};
+	
+	namespace.Validator = {
+	
+		add_plugin :function(name, method){
+			Plugins.add(name, method);
+		},
+		
+		add_messages :function(o){
+			Messages.default_messages = o;
+		},
+
+		add_rule : function(name, method, messages){
+			Rules[name] = method;
+			if(messages) Messages.default_messages[name] = messages;
+		},
+
+		_class :function( el ){
+
+			//Private
+			var
+				_self = this, evt, 
+				arr_elements, arr_elements_error,	
+				rules, handler, current_rules,
+				fn_validation;
+				
+				function _construct(){
+					
+					set();	
+					test( handler );
+					
+					this.handler = handler;
+				}
+				
+				this.messages = Messages.default_messages;	
+				
+				this.bind = function( name, method ){
+					$(evt).bind(name, function(e, error_list, error_map){
+						return method( error_list, error_map );
+					});
+				}
+
+				this.validate = function(rls, scope){
+
+					current_rules = rls;
+					fn_validation = validation;
+
+					add_validation.call( this, rls, scope );
+					handle_event('bind');
+
+					return this;
+				}
+
+				this.trigger = function(forceTrigger){
+					add_validation.call( this, current_rules );
+					return validation({ dont_trigger :!!forceTrigger});
+				}
+
+				this.live = function(rls, scope){
+
+					current_rules = rls;
+					add_validation.call( this, rls, scope );
+
+					var method = function(){
+						add_validation.call( this, rls, scope );
+						return validation();
+					}
+
+					fn_validation = method;
+					handle_event('bind');
+				}
+
+				function set(){
+					
+					handler = $(el);
+					evt = $('<span />');
+					form = handler.is('form') ? handler :handler.parents('form');
+					
+					arr_elements = [];
+					arr_elements_error = []; 
+					rules = {};
+				}
+
+				function handle_event(method){
+				
+					if(!handler.is('form')) {
+						if(method == 'bind')
+							handler[method]('click.validation', fn_validation);
+						else
+							handler[method]('click.validation');
+					}
+					else{
+						if(method == 'bind')
+							handler[method]('submit.validation', fn_validation);
+						else
+							handler[method]('submit.validation');
+					}
+				}
+				
+				function add_validation(rls, scope){
+									
+					var 
+						container = scope || form;
+					
+					rules = rls;
+					arr_elements = [];
+
+					for (var x in rls){
+
+						$(x, container).each(function(){
+							arr_elements.push({
+								element: this,
+								rules: dup( rls[x].rules ),
+								custom_messages: dup( rls[x].messages ) || {}
+							});
+
+							Plugins.execute.call(_self, rls[x], arr_elements[arr_elements.length - 1]);
+						});
+					}
+				}
+
+				function validation(e){
+
+					var 
+						map = {},
+						element, valid, x,
+						length = arr_elements.length;
+
+					arr_elements_error = [];
+
+					for(x = 0; x < length; x++){
+						
+						valid = true;
+						
+						el = arr_elements[x];
+						el.message = [];
+							
+						for (var name in el.rules){
+
+							if (!Rules[name] && !Plugins.plugin[name])
+								return console.warn('Não existe o método: ' + name);
+
+							if(!Rules[name]) continue;
+
+							if (!Rules[name].call( _self, el, el.rules[name] )){
+								el.message.push( Messages.get( name, el ) );
+								map[ name ] = Messages.get( name, el );
+								valid = false;
+							}
+						}
+
+						if( !valid ) arr_elements_error.push( el );
+					}
+
+					if ( arr_elements_error.length ) {
+						$(evt).trigger('error', [arr_elements_error, map]);
+						return false;
+					}
+
+					if(e && e.dont_trigger) return true; 
+
+					return $( evt ).triggerHandler('success', [_self.handler, _self]);
+				}
+
+			_construct.call(this);
+
+		},
+
+		create :function(o){ return new this._class(o); }
+	}
+	
+	Messages = { 
+		
+		default_messages : {},
+		
+		get :function(name, el){
+			
+			var 
+				field = el.element,
+				data = $(field).data('name'),
+				message = el.custom_messages[name] || Messages.default_messages[name];
+			
+			if(!message){
+				console.warn('Não existe mensagem definida para : ' + name);
+				return '';
+			}
+				
+			message = message.replace(/\{name\}/g, data || field.title );
+			return message;
+		}
+	};
+	
+	Plugins = {
+		
+		add : function(name, fn){ this.plugin[name] = fn },
+
+		plugin : {},
+
+		execute : function(rules, arr_elements){
+			for (var x in rules){
+				if (Plugins.plugin[x])
+					Plugins.plugin[x].call(this, arr_elements, rules[x]);
+			}
+		}
+	};
+	
+	function dup(o){ 
+		return $.extend({}, o); 
+	}
+
+	function test(h){
+		
+		if(!h.length){
+			console.warn(
+				'Não existe o elemento ' + el + ' para o validator. Tem certeza que está pegando o elemento certo?'
+			);
+		}
+	}
+
+})(window, jQuery)
