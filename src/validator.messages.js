@@ -20,7 +20,7 @@
 	var
 		M, messages;
 
-	messages = { default :'No message defined for: ' };
+	messages = { def :'No message defined for: ' };
 
 	M = {
 
@@ -34,7 +34,7 @@
 
 		write :function(name, el){
 
-			if( !messages[name] ) return messages.default + name;
+			if( !messages[name] ) return messages.def + name;
 			return messages[name].call? messages[name].call(null, element) :messages[name];
 		},
 
